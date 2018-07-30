@@ -1,0 +1,347 @@
+
+<!DOCTYPE html><html lang='en' class=''>
+<head>
+
+
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css'>
+<style class="cp-pen-styles">body {
+  background-color: #E6E6E6;
+}
+body .tic-tac-toe--field {
+  margin: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: white;
+  border-radius: 6px;
+  width: 300px;
+  height: 300px;
+  padding: 5px;
+}
+body .tic-tac-toe--field .tic-tac-toe--end-game-popover {
+  width: 300px;
+  height: 300px;
+  background-color: white;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 6px;
+  transition: visibility 0s 0.3s, opacity 0.3s linear;
+  opacity: 1;
+  visibility: visible;
+}
+body .tic-tac-toe--field .tic-tac-toe--end-game-popover.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+body .tic-tac-toe--field .tic-tac-toe--end-game-popover .tic-tac-toe--new-game-button {
+  height: 20px;
+  background-color: #e5523e;
+  border-radius: 20px;
+  color: white;
+  margin: auto;
+  padding: 10px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  cursor: pointer;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  transition: background-color 0.3s;
+}
+body .tic-tac-toe--field .tic-tac-toe--end-game-popover .tic-tac-toe--new-game-button:hover {
+  background-color: #fcd37b;
+}
+body .tic-tac-toe--field .tic-tac-toe--end-game-popover h1.tic-tac-toe--title-label {
+  color: #879973;
+  margin: 30px auto;
+  text-align: center;
+  width: 70%;
+}
+body .tic-tac-toe--field .tic-tac-toe--cells-matrix {
+  display: flex;
+  flex-wrap: wrap;
+}
+body .tic-tac-toe--field .tic-tac-toe--cells-matrix .tic-tac-toe-cell {
+  background-color: #e5523e;
+  margin: 5px;
+  width: 90px;
+  height: 90px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  position: relative;
+}
+body .tic-tac-toe--field .tic-tac-toe--cells-matrix .tic-tac-toe-cell:hover {
+  background-color: #fcd37b;
+}
+body .tic-tac-toe--field .tic-tac-toe--cells-matrix .tic-tac-toe-cell.xSymbol:before, body .tic-tac-toe--field .tic-tac-toe--cells-matrix .tic-tac-toe-cell.xSymbol:after {
+  position: absolute;
+  width: 6px;
+  height: 50px;
+  background-color: white;
+  display: block;
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 3px;
+}
+body .tic-tac-toe--field .tic-tac-toe--cells-matrix .tic-tac-toe-cell.xSymbol:before {
+  -webkit-transform: translate(-50%, -50%) rotate(45deg);
+          transform: translate(-50%, -50%) rotate(45deg);
+}
+body .tic-tac-toe--field .tic-tac-toe--cells-matrix .tic-tac-toe-cell.xSymbol:after {
+  -webkit-transform: translate(-50%, -50%) rotate(-45deg);
+          transform: translate(-50%, -50%) rotate(-45deg);
+}
+body .tic-tac-toe--field .tic-tac-toe--cells-matrix .tic-tac-toe-cell.oSymbol:after {
+  position: absolute;
+  display: block;
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  border: solid 6px white;
+  width: 44px;
+  height: 44px;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+}
+</style></head><body>
+
+<script src='//static.codepen.io/assets/common/stopExecutionOnTimeout-41c52890748cd7143004e05d3c5f786c66b19939c4500ce446314d1748483e13.js'></script><script src='//cdnjs.cloudflare.com/ajax/libs/react/0.11.0/react.min.js'></script><script src='//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js'></script>
+<script >(function() {
+  var EndGamePopOver, GameField, GameState, NewGameButton, TicTacToeCell, TicTacToeCellsMatrix, TitleLabel, div, gameState, h1;
+
+  GameState = (function() {
+    class GameState {
+      constructor() {
+        var x;
+        this.gameField = (function() {
+          var j, results;
+          results = [];
+          for (x = j = 0; j <= 8; x = ++j) {
+            results.push(Math.pow(2, x));
+          }
+          return results;
+        })();
+      }
+
+      currentSymbol() {
+        if (this.isX) {
+          return 'x';
+        } else {
+          return 'o';
+        }
+      }
+
+      currentPlayer() {
+        if (this.isX) {
+          return this.playerX;
+        } else {
+          return this.playerO;
+        }
+      }
+
+      checkWinConditions() {
+        var j, len, number, ref;
+        ref = this.winningNumbers;
+        for (j = 0, len = ref.length; j < len; j++) {
+          number = ref[j];
+          if ((number & this.currentPlayer()) === number) {
+            this.winner = `Il giocatore ${this.currentSymbol().toUpperCase()}`;
+          }
+        }
+        if (this.moves > 8) {
+          return this.winner = 'Nessuno';
+        }
+      }
+
+      updateCurrentSymbol() {
+        return this.isX = !this.isX;
+      }
+
+      updateState(index) {
+        if (this.isX) {
+          this.playerX += this.gameField[index];
+        } else {
+          this.playerO += this.gameField[index];
+        }
+        this.moves++;
+        this.checkWinConditions();
+        return this.updateCurrentSymbol();
+      }
+
+      reset() {
+        this.isX = true;
+        this.playerX = 0;
+        this.playerO = 0;
+        this.moves = 0;
+        return this.winner = null;
+      }
+
+    };
+
+    GameState.prototype.isX = true;
+
+    GameState.prototype.playerX = 0;
+
+    GameState.prototype.playerO = 0;
+
+    GameState.prototype.moves = 0;
+
+    GameState.prototype.winner = null;
+
+    GameState.prototype.gameField = null;
+
+    GameState.prototype.winningNumbers = [7, 56, 448, 73, 146, 292, 273, 84];
+
+    return GameState;
+
+  }).call(this);
+
+  gameState = new GameState;
+
+  ({div, h1} = React.DOM);
+
+  document.addEventListener('DOMContentLoaded', function() {
+    return React.renderComponent(GameField(), document.body);
+  });
+
+  GameField = React.createClass({
+    getInitialState: function() {
+      return {
+        gameIsBeingPlayed: false
+      };
+    },
+    render: function() {
+      return div({
+        className: 'tic-tac-toe--field',
+        children: [
+          TicTacToeCellsMatrix({
+            onClick: this.onCellClick,
+            gameIsBeingPlayed: this.state.gameIsBeingPlayed
+          }),
+          EndGamePopOver({
+            onNewGame: this.onNewGame,
+            gameIsBeingPlayed: this.state.gameIsBeingPlayed
+          })
+        ]
+      });
+    },
+    onNewGame: function() {
+      gameState.reset();
+      return this.setState({
+        gameIsBeingPlayed: true
+      });
+    },
+    onCellClick: function() {
+      if (gameState.winner) {
+        return this.setState({
+          gameIsBeingPlayed: false
+        });
+      }
+    }
+  });
+
+  TicTacToeCell = React.createClass({
+    getInitialState: function() {
+      return {
+        symbol: null
+      };
+    },
+    componentWillReceiveProps: function() {
+      if (!this.props.gameIsBeingPlayed) {
+        return this.setState({
+          symbol: null
+        });
+      }
+    },
+    render: function() {
+      return div({
+        className: this.classes(),
+        onMouseUp: this.clickHandler
+      });
+    },
+    classes: function() {
+      return ['tic-tac-toe-cell', this.state.symbol ? `${this.state.symbol}Symbol` : void 0].join(' ');
+    },
+    clickHandler: function() {
+      if (!this.state.symbol) {
+        this.setState({
+          symbol: gameState.currentSymbol()
+        });
+        gameState.updateState(this.props.index);
+        return this.props.onClick();
+      }
+    }
+  });
+
+  TicTacToeCellsMatrix = React.createClass({
+    render: function() {
+      var i;
+      return div({
+        className: 'tic-tac-toe--cells-matrix',
+        children: (function() {
+          var j, results;
+          results = [];
+          for (i = j = 0; j <= 8; i = ++j) {
+            results.push(TicTacToeCell({
+              index: i,
+              gameIsBeingPlayed: this.props.gameIsBeingPlayed,
+              onClick: this.props.onClick
+            }));
+          }
+          return results;
+        }).call(this)
+      });
+    }
+  });
+
+  EndGamePopOver = React.createClass({
+    render: function() {
+      return div({
+        className: this.classes(),
+        children: [
+          NewGameButton({
+            onClick: this.props.onNewGame
+          }),
+          TitleLabel({
+            winner: gameState.winner
+          })
+        ]
+      });
+    },
+    classes: function() {
+      return ['tic-tac-toe--end-game-popover', this.props.gameIsBeingPlayed ? "hidden" : void 0].join(' ');
+    }
+  });
+
+  TitleLabel = React.createClass({
+    render: function() {
+      return h1({
+        className: 'tic-tac-toe--title-label',
+        children: this.props.winner ? `${this.props.winner} vince` : void 0
+      });
+    }
+  });
+
+  NewGameButton = React.createClass({
+    render: function() {
+      return div({
+        className: 'tic-tac-toe--new-game-button',
+        children: 'Nuovo gioco',
+        onMouseUp: this.props.onClick
+      });
+    }
+  });
+
+}).call(this);
+
+</script>
+</body>
+</html>
